@@ -1,0 +1,7 @@
+Neos:
+  Flow:
+    http:
+      middlewares:
+        'languageRedirect':
+          middleware: 'Wegmeister\LanguageRedirect\Middleware\LanguageRedirectMiddleware'
+          position: 'after trustedProxies'

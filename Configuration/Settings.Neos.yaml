@@ -1,0 +1,6 @@
+Neos:
+  Neos:
+    routing:
+      # Disable empty segments for dimensions so the language menu will never
+      # link to an url without a language segment.
+      supportEmptySegmentForDimensions: false

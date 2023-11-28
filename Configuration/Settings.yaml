@@ -1,0 +1,4 @@
+Wegmeister:
+  LanguageRedirect:
+    # Add mappings for language codes if you use some different codes than the default ones.
+    languageCodeOverrides: {}
