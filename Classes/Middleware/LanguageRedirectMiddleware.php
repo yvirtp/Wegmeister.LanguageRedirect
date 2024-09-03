@@ -24,6 +24,9 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
     #[Flow\InjectConfiguration(path: 'languageCodeOverrides')]
     protected array $languageCodeOverrides;
 
+    #[Flow\InjectConfiguration(path: 'feLanguageCookieName')]
+    protected string $feLanguageCookieName;
+
     /**
      * Redirect all requests to the homepage without a language prefix to the
      * homepage with the language that matches the browser language best.
@@ -52,9 +55,18 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
 
         $defaultPreset = $this->contentDimensionPresetSource->getDefaultPreset('language');
 
-        $preset = $this->findMatchingPresetByAcceptLanguageHeader(
-            $request->getHeader('Accept-Language')[0] ?? '',
-        );
+        $preset = null;
+
+        if ($this->feLanguageCookieName && isset($request->getCookieParams()[$this->feLanguageCookieName])) {
+            $feLanguageCookie = $request->getCookieParams()[$this->feLanguageCookieName];
+            $preset = $this->findMatchingPresetByFeLanguageCookie($feLanguageCookie);
+        }
+
+        if ($preset == null) {
+            $preset = $this->findMatchingPresetByAcceptLanguageHeader(
+                $request->getHeader('Accept-Language')[0] ?? '',
+            );
+        }
 
         if ($preset == null) {
             $preset = $defaultPreset;
@@ -63,9 +75,9 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
         if ($preset === null) {
             throw new Exception(
                 'Unable to find a language preset for the detected locale '
-                    . 'and no default preset is configured. '
-                    . 'Check your content dimensions settings: '
-                    . 'Neos.ContentRepository.contentDimensions.language.',
+                . 'and no default preset is configured. '
+                . 'Check your content dimensions settings: '
+                . 'Neos.ContentRepository.contentDimensions.language.',
                 1701173151780
             );
         }
@@ -118,6 +130,41 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
             // No preset for the detected locale found, continue with next part
             array_shift($parts);
             $acceptLanguageHeader = implode(',', $parts);
+        }
+
+        return null;
+    }
+
+    /**
+     * Match frontend language cookie against given language dimensions.
+     * Return the Locale, that fits best.
+     *
+     * @param string $acceptLanguageHeader
+     *
+     * @return array|null
+     */
+    protected function findMatchingPresetByFeLanguageCookie(string $feLanguageCookie): ?array
+    {
+        $detectedLocale = $this->localeDetector->detectLocaleFromLocaleTag($feLanguageCookie);
+
+        if (!$detectedLocale instanceof Locale) {
+            // No Locale found
+            return null;
+        }
+
+        $languageCode = $detectedLocale->getLanguage();
+        if (isset($this->languageCodeOverrides[$languageCode])) {
+            // If there is a language code override, use it
+            $languageCode = $this->languageCodeOverrides[$languageCode];
+        }
+
+        $preset = $this->contentDimensionPresetSource->findPresetByUriSegment(
+            'language',
+            $languageCode
+        );
+
+        if ($preset !== null) {
+            return $preset;
         }
 
         return null;
