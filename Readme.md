@@ -25,6 +25,6 @@ Wegmeister:
     languageCodeOverrides:
       # For example, if you use "cz" instead of "cs" for Czech, you can add this mapping:
       cs: cz
-      # configure the name of your frontend language cookie name
+      # configure the name of your frontend language cookie
       feLanguageCookieName: _fe_language
 ```
