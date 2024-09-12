@@ -105,31 +105,16 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
                 $acceptLanguageHeader
             );
 
-            if (!$detectedLocale instanceof Locale) {
+            $resolvedLocale = $this->resolveLocale($detectedLocale);
+
+            if ($resolvedLocale === null) {
                 // No Locale found, continue with next part
                 array_shift($parts);
                 $acceptLanguageHeader = implode(',', $parts);
                 continue;
             }
 
-            $languageCode = $detectedLocale->getLanguage();
-            if (isset($this->languageCodeOverrides[$languageCode])) {
-                // If there is a language code override, use it
-                $languageCode = $this->languageCodeOverrides[$languageCode];
-            }
-
-            $preset = $this->contentDimensionPresetSource->findPresetByUriSegment(
-                'language',
-                $languageCode
-            );
-
-            if ($preset !== null) {
-                return $preset;
-            }
-
-            // No preset for the detected locale found, continue with next part
-            array_shift($parts);
-            $acceptLanguageHeader = implode(',', $parts);
+            return $resolvedLocale;
         }
 
         return null;
@@ -146,6 +131,20 @@ class LanguageRedirectMiddleware implements MiddlewareInterface
     protected function findMatchingPresetByFeLanguageCookie(string $feLanguageCookie): ?array
     {
         $detectedLocale = $this->localeDetector->detectLocaleFromLocaleTag($feLanguageCookie);
+
+        return $this->resolveLocale($detectedLocale);
+    }
+
+    /**
+     * Resolve a locale string and return it
+     *
+     * @param string $acceptLanguageHeader
+     *
+     * @return array|null
+     */
+    protected function resolveLocale(string $localeString): ?array
+    {
+        $detectedLocale = $this->localeDetector->detectLocaleFromLocaleTag($localeString);
 
         if (!$detectedLocale instanceof Locale) {
             // No Locale found

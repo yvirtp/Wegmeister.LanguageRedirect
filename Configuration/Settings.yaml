@@ -2,5 +2,5 @@ Wegmeister:
   LanguageRedirect:
     # Add mappings for language codes if you use some different codes than the default ones.
     languageCodeOverrides: {}
-    # configure the name of your frontend language cookie name
-    feLanguageCookieName: _fe_language
+    # Configure the name of your frontend language cookie name
+    feLanguageCookieName: ''

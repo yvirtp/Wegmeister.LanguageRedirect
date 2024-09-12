@@ -17,6 +17,9 @@ Then run `composer update` in your project root.
 Sometimes language codes are not configured the same as in Neos. Therefore you can configure a mapping in your `Settings.yaml`:
 Also you can configure a feLanguageCookieName to get a cookie value from your frontend in case you want your users last
 opened language to reopen the next time he visits your website.
+The `feLanguageCookieName` allows you to read a cookie that contains a default language.
+Perhaps you can use this to always load the last language the user opened
+by setting the cookie when he changes the language via the language menu on your website.
 
 ```yaml
 Wegmeister:
@@ -25,6 +28,6 @@ Wegmeister:
     languageCodeOverrides:
       # For example, if you use "cz" instead of "cs" for Czech, you can add this mapping:
       cs: cz
-      # configure the name of your frontend language cookie
-      feLanguageCookieName: _fe_language
+    # configure the name of your frontend language cookie
+    feLanguageCookieName: _fe_language
 ```
